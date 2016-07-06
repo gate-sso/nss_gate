@@ -1,0 +1,3 @@
+nss_http:
+  host_url: https://<hostname>/nss-http
+  api_key: <EXAMPLE TOKEN>
