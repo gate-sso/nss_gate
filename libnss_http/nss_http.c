@@ -63,12 +63,20 @@ nss_http_request(const char *url) {
 
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_response);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &write_result);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
     status = curl_easy_perform(curl);
-    if (status != 0) goto error;
+    if (status != 0) {
+        fprintf(stderr, "Error executing curl - returned with error code %d\n", (int)status);
+        goto error;
+    }
 
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
-    if (code != 200) goto error;
+    if (code != 200) {
+        fprintf(stderr, "Got Wrong status code %d", (int)code);
+        goto error;
+    }
 
     curl_easy_cleanup(curl);
     curl_slist_free_all(headers);

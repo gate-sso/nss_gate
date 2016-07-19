@@ -118,9 +118,11 @@ enum nss_status
 _nss_http_setpwent(int stayopen)
 {
     enum nss_status ret;
+    //fprintf(stderr, "NSS DEBUG: Called %s with args (stayopen: %d)\n", __FUNCTION__, stayopen);
     NSS_HTTP_LOCK();
     ret = _nss_http_setpwent_locked(stayopen);
     NSS_HTTP_UNLOCK();
+    //fprintf(stderr, "NSS RETURN: Called %s with args (stayopen: %d)\n", __FUNCTION__, stayopen);
     return ret;
 }
 
@@ -142,9 +144,11 @@ enum nss_status
 _nss_http_endpwent(void)
 {
     enum nss_status ret;
+    //fprintf(stderr, "NSS DEBUG: Called %s\n", __FUNCTION__);
     NSS_HTTP_LOCK();
     ret = _nss_http_endpwent_locked();
     NSS_HTTP_UNLOCK();
+    //fprintf(stderr, "NSS DEBUG: Return %s\n", __FUNCTION__);
     return ret;
 }
 
@@ -152,6 +156,7 @@ _nss_http_endpwent(void)
 enum nss_status
 _nss_http_getpwent_r_locked(struct passwd *result, char *buffer, size_t buflen, int *errnop)
 {
+
     enum nss_status ret = NSS_STATUS_SUCCESS;
 
     if (ent_json_root == NULL) {
@@ -190,9 +195,11 @@ enum nss_status
 _nss_http_getpwent_r(struct passwd *result, char *buffer, size_t buflen, int *errnop)
 {
     enum nss_status ret;
+    //fprintf(stderr, "NSS DEBUG: Called %s\n", __FUNCTION__);
     NSS_HTTP_LOCK();
     ret = _nss_http_getpwent_r_locked(result, buffer, buflen, errnop);
     NSS_HTTP_UNLOCK();
+    //fprintf(stderr, "NSS DEBUG: Called %s\n", __FUNCTION__);
     return ret;
 }
 
@@ -209,6 +216,7 @@ _nss_http_getpwuid_r_locked(uid_t uid, struct passwd *result, char *buffer, size
     char token[255];
     get_config_host(host_name, token);
     snprintf(url, 512, "%s/passwd?token=%s&uid=%d", host_name, token, uid);
+
 
     char *response = nss_http_request(url);
     if (!response) {
@@ -247,9 +255,13 @@ enum nss_status
 _nss_http_getpwuid_r(uid_t uid, struct passwd *result, char *buffer, size_t buflen, int *errnop)
 {
     enum nss_status ret;
+    //fprintf(stderr, "NSS DEBUG: Called %s with args (uid: %d)\n", __FUNCTION__, uid);
+
     NSS_HTTP_LOCK();
     ret = _nss_http_getpwuid_r_locked(uid, result, buffer, buflen, errnop);
     NSS_HTTP_UNLOCK();
+    //fprintf(stderr, "NSS RETURN: Called %s with args (uid: %d)\n", __FUNCTION__, uid);
+
     return ret;
 }
 
@@ -268,9 +280,11 @@ _nss_http_getpwnam_r_locked(const char *name, struct passwd *result, char *buffe
 
     snprintf(url, 512, "%s/passwd?token=%s&name=%s", host_name, token, name);
 
+
+
     char *response = nss_http_request(url);
 
-    //printf("RESPONSE \n %s \n", response);
+    //fprintf(stderr, "RESPONSE \n %s \n", response);
     if (!response) {
         *errnop = ENOENT;
         return NSS_STATUS_UNAVAIL;
@@ -279,14 +293,14 @@ _nss_http_getpwnam_r_locked(const char *name, struct passwd *result, char *buffe
     json_root = json_loads(response, 0, &json_error);
 
     if (!json_root) {
-        printf("Could not parse JSON\n");
+        fprintf(stderr, "Could not parse JSON\n");
         *errnop = ENOENT;
         return NSS_STATUS_UNAVAIL;
     }
 
     int pack_result = pack_passwd_struct(json_root, result, buffer, buflen);
     if (pack_result == -1) {
-        printf("Could not pack JSON\n");
+        fprintf(stderr, "Could not pack JSON\n");
 
         json_decref(json_root);
         *errnop = ENOENT;
@@ -294,6 +308,7 @@ _nss_http_getpwnam_r_locked(const char *name, struct passwd *result, char *buffe
     }
 
     if (pack_result == -2) {
+        fprintf(stderr, "Could not pack JSON\n");
         json_decref(json_root);
         *errnop = ERANGE;
         return NSS_STATUS_TRYAGAIN;
@@ -310,9 +325,11 @@ enum nss_status
 _nss_http_getpwnam_r(const char *name, struct passwd *result, char *buffer, size_t buflen, int *errnop)
 {
     enum nss_status ret;
+    //fprintf(stderr, "NSS DEBUG: Called %s with args (name: %s)\n", __FUNCTION__, name);
     NSS_HTTP_LOCK();
     ret = _nss_http_getpwnam_r_locked(name, result, buffer, buflen, errnop);
     NSS_HTTP_UNLOCK();
+    //fprintf(stderr, "NSS DEBUG: RETURN %s with args (name: %s)\n", __FUNCTION__, name);
     return ret;
 }
 
