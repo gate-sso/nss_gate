@@ -78,7 +78,7 @@ _nss_http_setgrent_locked(int stayopen)
     char host_name[255];
     char token[255];
     get_config_host(host_name, token);
-    snprintf(url, 512, "http://%s/group", host_name);
+    snprintf(url, 512, "%s/group", host_name);
 
     char *response = nss_http_request(url);
     if (!response) {
