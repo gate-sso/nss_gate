@@ -293,14 +293,14 @@ _nss_http_getpwnam_r_locked(const char *name, struct passwd *result, char *buffe
     json_root = json_loads(response, 0, &json_error);
 
     if (!json_root) {
-        fprintf(stderr, "Could not parse JSON\n");
+        //fprintf(stderr, "Could not parse JSON\n");
         *errnop = ENOENT;
         return NSS_STATUS_UNAVAIL;
     }
 
     int pack_result = pack_passwd_struct(json_root, result, buffer, buflen);
     if (pack_result == -1) {
-        fprintf(stderr, "Could not pack JSON\n");
+        //fprintf(stderr, "Could not pack JSON\n");
 
         json_decref(json_root);
         *errnop = ENOENT;
@@ -308,7 +308,7 @@ _nss_http_getpwnam_r_locked(const char *name, struct passwd *result, char *buffe
     }
 
     if (pack_result == -2) {
-        fprintf(stderr, "Could not pack JSON\n");
+        //fprintf(stderr, "Could not pack JSON\n");
         json_decref(json_root);
         *errnop = ERANGE;
         return NSS_STATUS_TRYAGAIN;

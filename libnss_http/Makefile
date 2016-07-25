@@ -6,8 +6,8 @@ LIBRARY=libnss_http.so.2.0
 LINKS=libnss_http.so.2 libnss_http.so
 
 DESTDIR=/
-PREFIX=$(DESTDIR)/usr
-LIBDIR=$(PREFIX)/lib
+PREFIX=$(DESTDIR)/lib
+LIBDIR=$(PREFIX)/x86_64-linux-gnu
 BUILD=.libs
 
 default: build
