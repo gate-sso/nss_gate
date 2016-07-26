@@ -11,8 +11,7 @@ static int ent_json_idx = 0;
 // -1 Failed to parse
 // -2 Buffer too small
 static int
-pack_group_struct(json_t *root, struct group *result, char *buffer, size_t buflen)
-{
+pack_group_struct(json_t *root, struct group *result, char *buffer, size_t buflen) {
 
     char *next_buf = buffer;
     size_t bufleft = buflen;
@@ -35,23 +34,34 @@ pack_group_struct(json_t *root, struct group *result, char *buffer, size_t bufle
     if (bufleft <= j_strlen(j_gr_name)) return -2;
     result->gr_name = strncpy(next_buf, json_string_value(j_gr_name), bufleft);
     next_buf += strlen(result->gr_name) + 1;
-    bufleft  -= strlen(result->gr_name) + 1;
+    bufleft -= strlen(result->gr_name) + 1;
 
     if (bufleft <= j_strlen(j_gr_passwd)) return -2;
     result->gr_passwd = strncpy(next_buf, json_string_value(j_gr_passwd), bufleft);
     next_buf += strlen(result->gr_passwd) + 1;
-    bufleft  -= strlen(result->gr_passwd) + 1;
+    bufleft -= strlen(result->gr_passwd) + 1;
 
     // Yay, ints are so easy!
     result->gr_gid = json_integer_value(j_gr_gid);
 
-    // Carve off some space for array of members.
-    result->gr_mem = (char **)next_buf;
-    next_buf += (json_array_size(j_gr_mem) + 1) * sizeof(char *);
-    bufleft  -= (json_array_size(j_gr_mem) + 1) * sizeof(char *);
+    int array_size = 0;
+    for (int i = 0; i < json_array_size(j_gr_mem); i++) {
+        j_member = json_array_get(j_gr_mem, i);
+        if (!json_is_string(j_member)) return -1;
+        array_size = array_size + sizeof(j_member) + sizeof(char *);
+    }
 
-    for(int i = 0; i < json_array_size(j_gr_mem); i++)
-    {
+    //fprintf(stderr, "Size of Array %d\n", array_size);
+
+    if (array_size > sysconf(_SC_GETGR_R_SIZE_MAX))
+        return -2;
+
+    // Carve off some space for array of members.
+    result->gr_mem = (char **) next_buf;
+    next_buf += (json_array_size(j_gr_mem) + 1) * sizeof(char *);
+    bufleft -= (json_array_size(j_gr_mem) + 1) * sizeof(char *);
+
+    for (int i = 0; i < json_array_size(j_gr_mem); i++) {
         j_member = json_array_get(j_gr_mem, i);
         if (!json_is_string(j_member)) return -1;
 
@@ -60,7 +70,7 @@ pack_group_struct(json_t *root, struct group *result, char *buffer, size_t bufle
         result->gr_mem[i] = next_buf;
 
         next_buf += strlen(result->gr_mem[i]) + 1;
-        bufleft  -= strlen(result->gr_mem[i]) + 1;
+        bufleft -= strlen(result->gr_mem[i]) + 1;
 
     }
 
@@ -69,8 +79,7 @@ pack_group_struct(json_t *root, struct group *result, char *buffer, size_t bufle
 
 
 enum nss_status
-_nss_http_setgrent_locked(int stayopen)
-{
+_nss_http_setgrent_locked(int stayopen) {
     char url[512];
     json_t *json_root;
     json_error_t json_error;
@@ -107,8 +116,7 @@ _nss_http_setgrent_locked(int stayopen)
 
 // Called to open the group file
 enum nss_status
-_nss_http_setgrent(int stayopen)
-{
+_nss_http_setgrent(int stayopen) {
     enum nss_status ret;
     NSS_HTTP_LOCK();
     ret = _nss_http_setgrent_locked(stayopen);
@@ -118,9 +126,8 @@ _nss_http_setgrent(int stayopen)
 
 
 enum nss_status
-_nss_http_endgrent_locked(void)
-{
-    if (ent_json_root){
+_nss_http_endgrent_locked(void) {
+    if (ent_json_root) {
         while (ent_json_root->refcount > 0) json_decref(ent_json_root);
     }
     ent_json_root = NULL;
@@ -131,8 +138,7 @@ _nss_http_endgrent_locked(void)
 
 // Called to close the group file
 enum nss_status
-_nss_http_endgrent(void)
-{
+_nss_http_endgrent(void) {
     enum nss_status ret;
     NSS_HTTP_LOCK();
     ret = _nss_http_endgrent_locked();
@@ -142,8 +148,7 @@ _nss_http_endgrent(void)
 
 
 enum nss_status
-_nss_http_getgrent_r_locked(struct group *result, char *buffer, size_t buflen, int *errnop)
-{
+_nss_http_getgrent_r_locked(struct group *result, char *buffer, size_t buflen, int *errnop) {
     enum nss_status ret = NSS_STATUS_SUCCESS;
 
     if (ent_json_root == NULL) {
@@ -153,7 +158,7 @@ _nss_http_getgrent_r_locked(struct group *result, char *buffer, size_t buflen, i
     if (ret != NSS_STATUS_SUCCESS) return ret;
 
     int pack_result = pack_group_struct(
-        json_array_get(ent_json_root, ent_json_idx), result, buffer, buflen
+            json_array_get(ent_json_root, ent_json_idx), result, buffer, buflen
     );
 
     if (pack_result == -1) {
@@ -179,8 +184,7 @@ _nss_http_getgrent_r_locked(struct group *result, char *buffer, size_t buflen, i
 
 // Called to look up next entry in group file
 enum nss_status
-_nss_http_getgrent_r(struct group *result, char *buffer, size_t buflen, int *errnop)
-{
+_nss_http_getgrent_r(struct group *result, char *buffer, size_t buflen, int *errnop) {
     enum nss_status ret;
     NSS_HTTP_LOCK();
     ret = _nss_http_getgrent_r_locked(result, buffer, buflen, errnop);
@@ -191,8 +195,7 @@ _nss_http_getgrent_r(struct group *result, char *buffer, size_t buflen, int *err
 
 // Find a group by gid
 enum nss_status
-_nss_http_getgrgid_r_locked(gid_t gid, struct group *result, char *buffer, size_t buflen, int *errnop)
-{
+_nss_http_getgrgid_r_locked(gid_t gid, struct group *result, char *buffer, size_t buflen, int *errnop) {
     char url[512];
     json_t *json_root;
     json_error_t json_error;
@@ -239,8 +242,7 @@ _nss_http_getgrgid_r_locked(gid_t gid, struct group *result, char *buffer, size_
 
 
 enum nss_status
-_nss_http_getgrgid_r(gid_t gid, struct group *result, char *buffer, size_t buflen, int *errnop)
-{
+_nss_http_getgrgid_r(gid_t gid, struct group *result, char *buffer, size_t buflen, int *errnop) {
     enum nss_status ret;
     NSS_HTTP_LOCK();
     ret = _nss_http_getgrgid_r_locked(gid, result, buffer, buflen, errnop);
@@ -250,8 +252,7 @@ _nss_http_getgrgid_r(gid_t gid, struct group *result, char *buffer, size_t bufle
 
 
 enum nss_status
-_nss_http_getgrnam_r_locked(const char *name, struct group *result, char *buffer, size_t buflen, int *errnop)
-{
+_nss_http_getgrnam_r_locked(const char *name, struct group *result, char *buffer, size_t buflen, int *errnop) {
 
 
     char url[512];
@@ -263,7 +264,6 @@ _nss_http_getgrnam_r_locked(const char *name, struct group *result, char *buffer
     get_config_host(host_name, token);
 
     snprintf(url, 512, "%s/group?name=%s&token=%s", host_name, name, token);
-
 
 
     fprintf(stderr, "getgrnam_r_locked %s ", url);
@@ -302,8 +302,7 @@ _nss_http_getgrnam_r_locked(const char *name, struct group *result, char *buffer
 
 // Find a group by name
 enum nss_status
-_nss_http_getgrnam_r(const char *name, struct group *result, char *buffer, size_t buflen, int *errnop)
-{
+_nss_http_getgrnam_r(const char *name, struct group *result, char *buffer, size_t buflen, int *errnop) {
     enum nss_status ret;
     NSS_HTTP_LOCK();
     ret = _nss_http_getgrnam_r_locked(name, result, buffer, buflen, errnop);
