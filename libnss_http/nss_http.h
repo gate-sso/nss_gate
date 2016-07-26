@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #define NSS_HTTP_INITIAL_BUFFER_SIZE (256 * 1024)  /* 256 KB */
 #define NSS_HTTP_MAX_BUFFER_SIZE (10 * 1024 * 1024)  /* 10 MB */
