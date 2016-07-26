@@ -88,7 +88,6 @@ _nss_http_setgrent_locked(int stayopen) {
     char token[255];
     get_config_host(host_name, token);
     snprintf(url, 512, "%s/group?token=%s", host_name, token);
-    fprintf(stderr, "getgrent_locked %s ", url);
 
 
     char *response = nss_http_request(url);
@@ -206,7 +205,6 @@ _nss_http_getgrgid_r_locked(gid_t gid, struct group *result, char *buffer, size_
     snprintf(url, 512, "%s/group?gid=%d&token=%s", host_name, gid, token);
 
 
-    fprintf(stderr, "getgrgid_r_locked %s ", url);
 
     char *response = nss_http_request(url);
     if (!response) {
@@ -266,7 +264,6 @@ _nss_http_getgrnam_r_locked(const char *name, struct group *result, char *buffer
     snprintf(url, 512, "%s/group?name=%s&token=%s", host_name, name, token);
 
 
-    fprintf(stderr, "getgrnam_r_locked %s ", url);
     char *response = nss_http_request(url);
     if (!response) {
         *errnop = ENOENT;
