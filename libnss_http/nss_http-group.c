@@ -86,11 +86,13 @@ _nss_http_setgrent_locked(int stayopen) {
 
     char host_name[255];
     char token[255];
+    char *response = NULL;
     get_config_host(host_name, token);
     snprintf(url, 512, "%s/group?token=%s", host_name, token);
 
 
-    char *response = nss_http_request(url);
+    response = malloc(NSS_HTTP_INITIAL_BUFFER_SIZE);
+    nss_http_request(url, response);
     if (!response) {
         return NSS_STATUS_UNAVAIL;
     }
@@ -200,13 +202,15 @@ _nss_http_getgrgid_r_locked(gid_t gid, struct group *result, char *buffer, size_
     json_error_t json_error;
     char host_name[255];
     char token[255];
+    char *response = NULL;
     get_config_host(host_name, token);
 
     snprintf(url, 512, "%s/group?gid=%d&token=%s", host_name, gid, token);
 
 
 
-    char *response = nss_http_request(url);
+    response = malloc(NSS_HTTP_INITIAL_BUFFER_SIZE);
+    nss_http_request(url, response);
     if (!response) {
         *errnop = ENOENT;
         return NSS_STATUS_UNAVAIL;
@@ -259,12 +263,14 @@ _nss_http_getgrnam_r_locked(const char *name, struct group *result, char *buffer
 
     char host_name[255];
     char token[255];
+    char *response = NULL;
     get_config_host(host_name, token);
 
     snprintf(url, 512, "%s/group?name=%s&token=%s", host_name, name, token);
 
 
-    char *response = nss_http_request(url);
+    response = malloc(NSS_HTTP_INITIAL_BUFFER_SIZE);
+    nss_http_request(url, response);
     if (!response) {
         *errnop = ENOENT;
         return NSS_STATUS_UNAVAIL;

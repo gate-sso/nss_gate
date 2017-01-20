@@ -87,10 +87,12 @@ _nss_http_setpwent_locked(int stayopen)
 
     char host_name[255];
     char token[255];
+    char response = NULL;
     get_config_host(host_name, token);
     snprintf(url, 512, "%s/passwd?token=%s", host_name, token);
 
-    char *response = nss_http_request(url);
+    response = malloc(NSS_HTTP_INITIAL_BUFFER_SIZE);
+    nss_http_request(url, response);
     if (!response) {
         return NSS_STATUS_UNAVAIL;
     }
@@ -214,11 +216,13 @@ _nss_http_getpwuid_r_locked(uid_t uid, struct passwd *result, char *buffer, size
 
     char host_name[255];
     char token[255];
+    char *response = NULL;
+    response = malloc(NSS_HTTP_INITIAL_BUFFER_SIZE);
     get_config_host(host_name, token);
     snprintf(url, 512, "%s/passwd?token=%s&uid=%d", host_name, token, uid);
 
 
-    char *response = nss_http_request(url);
+    nss_http_request(url, response);
     if (!response) {
         *errnop = ENOENT;
         return NSS_STATUS_UNAVAIL;
@@ -275,6 +279,7 @@ _nss_http_getpwnam_r_locked(const char *name, struct passwd *result, char *buffe
 
     char host_name[255];
     char token[255];
+    char *response = NULL;
     get_config_host(host_name, token);
 
 
@@ -282,7 +287,8 @@ _nss_http_getpwnam_r_locked(const char *name, struct passwd *result, char *buffe
 
 
 
-    char *response = nss_http_request(url);
+    response = malloc(NSS_HTTP_INITIAL_BUFFER_SIZE);
+    nss_http_request(url, response);
 
     //fprintf(stderr, "RESPONSE \n %s \n", response);
     if (!response) {

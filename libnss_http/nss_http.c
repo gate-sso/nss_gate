@@ -39,8 +39,8 @@ static size_t write_response(void *ptr, size_t size, size_t nmemb, void *stream)
 }
 
 
-char *
-nss_http_request(const char *url) {
+void
+nss_http_request(const char *url, char * out_result) {
     CURL *curl = NULL;
     CURLcode status;
     struct curl_slist *headers = NULL;
@@ -83,6 +83,7 @@ nss_http_request(const char *url) {
     curl_global_cleanup();
 
     data[write_result.pos] = '\0';
+    strncpy(out_result, data, write_result.pos);
 
     return data;
 
