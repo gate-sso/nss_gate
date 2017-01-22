@@ -87,7 +87,7 @@ _nss_http_setpwent_locked(int stayopen)
 
     char host_name[255];
     char token[255];
-    char response = NULL;
+    char *response = NULL;
     get_config_host(host_name, token);
     snprintf(url, 512, "%s/passwd?token=%s", host_name, token);
 
