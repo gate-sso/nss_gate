@@ -85,7 +85,7 @@ nss_http_request(const char *url, char * out_result) {
     data[write_result.pos] = '\0';
     strncpy(out_result, data, write_result.pos);
 
-    return data;
+    return;
 
     error:
     if (data)
@@ -95,8 +95,6 @@ nss_http_request(const char *url, char * out_result) {
     if (headers)
         curl_slist_free_all(headers);
     curl_global_cleanup();
-
-    return NULL;
 }
 
 void get_config_host(char *out_hostname, char *out_token) {
