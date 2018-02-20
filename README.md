@@ -2,12 +2,12 @@
 
 nss_gate is Unix/Linux Name Service Switch providing user, groups and shadow lookup over http using gate-sso server. GateSSO in turn uses Google MFA to authenticate - so you can actually allow MFA on Linux prompt using nss_gate.
 
-This module enables you to authenticate users against any http based server so that you don't have to create new users on each box and centraly control user access.
+This module enables you to authenticate users against any http based server so that you don't have to create new users on each box and centrally control user access.
 
 * Provides user lookup over http
 * Provides group lookup over http
 
-This module was forked from opensource nss_http implementation, but this has grown into much more configurable. Given that it has only similarities about the way nss functions are implemented, this needs a new home, now it's here complementing our gate mfa server as a nice nss module.
+This module was forked from opensource nss_http implementation, but this has become much more configurable. Given that it has similarities only about the way nss functions are implemented, this needs a new home, now it's here complementing our gate mfa server as a nice nss module.
 
 Configuration & installation
 -------------
